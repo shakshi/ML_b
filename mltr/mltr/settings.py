@@ -39,6 +39,7 @@ INSTALLED_APPS = [
 
     #thrid party
     'material',
+    'celery_progress',
 
     #owns
     'pages',
@@ -136,3 +137,16 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 MEDIA_URL = '/media/'
+
+# CELERY STUFF
+BROKER_URL = 'redis://localhost:6379'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379'
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'Africa/Nairobi'
+
+CELERY_IGNORE_RESULT= False
+CELERY_TRACK_STARTED = True
+CELERY_SEND_TASK_SENT_EVENT = False
+
