@@ -10,14 +10,68 @@
 <div> Running object tracking on the video file to get json file</div>
 <br>
 
-<div class='progress-wrapper'>
-  <div id='progress-bar' class='progress-bar' style="background-color: #68a9ef; width: 0%;">&nbsp;</div>
+<div class="progress" style="width: 50%; background-color: #acece6" id="progress-bar">
+    <div class="indeterminate" style="background-color: #26a69a"></div>
 </div>
-<div id="progress-bar-message">Waiting for progress to start...</div>
 
-<script>
-</script>
+<div id="progress-complete">
+	Processing completed 
+</div>
 
 <script src="{% static 'js/yolo.js' %}"> </script>
+<script>
+/*
+check a url after 500 ms 
+if task done then stop displaying this progress bar 
+else keep displaying it
+*/
 
+var progress_ele= document.getElementById("progress-complete");
+progress_ele.style.display="none";
+
+function update(task_done){
+
+	if(task_done){
+		//hide the progress bar 
+		var ele = document.getElementById("progress-bar");
+		ele.style.display="none";
+	}
+}
+
+function showProgressComplete(){
+
+	var progress_ele= document.getElementById("progress-complete");
+	progress_ele.style.display="block";
+
+}
+
+var progressUrl='{% url "task_status" task_id %}'
+console.log(progressUrl)
+
+function getProgress (progressUrl) {
+
+	console.log("checking progress of thread");
+	progressUrl='{% url "task_status" task_id %}'
+    fetch(progressUrl).then(function(response) {
+        response.json().then(function(data) {
+            // update the UI components
+            var done= data.task_done
+            console.log("Response: task done", done)
+            update(done);
+
+            if(done == false){
+            	setTimeout(getProgress, 500, progressUrl);   //500 ms check again
+        	}
+        	else{
+        		//true - then complete
+        		//show progress completed 
+        		showProgressComplete();
+        	}
+        });
+    });
+}
+
+getProgress(progressUrl)
+
+</script>
 {%endblock%}

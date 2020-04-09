@@ -2,17 +2,15 @@ from django.shortcuts import render,get_object_or_404
 from .models import Video
 from .forms import VideoForm
 import cv2
-from .CarmaCam.model._yolo import YoloDetector
+#from CarmaCam.model._yolo import YoloDetector
 from django.conf import settings
 from PIL import Image
 import json
 import os
 
+import threading
 import time
-
-from django.http import HttpResponse, HttpResponseNotFound
-from django.shortcuts import redirect
-from mltr.celery import app
+from django.http import JsonResponse
 
 
 # Create your views here.
@@ -61,22 +59,6 @@ def video_list_view(request):
     return render(request, "video/show.html", context)
 
 
-def poll_state(request):
-    
-    """ A view to report the progress to the user """
-    if 'job' in request.GET:
-        job_id = request.GET['job']
-    else:
-        return HttpResponse('No job id given.')
-
-    #job = AsyncResult(job_id)
-    #data = {'id': job.id, 'state': job.state, 'info': job.info}
-    data= {}
-    if data == None:
-        return HttpResponse('Invalid job id')        
-    return HttpResponse(json.dumps(data), content_type='application/json')
-
-
 def process_video(video_id):
 
     obj = get_object_or_404(Video, id=video_id)
@@ -117,41 +99,54 @@ def process_video(video_id):
 
     return result
 
-def video_yolo_view(request, video_id):
+def yolo_task(lk, id):
+     
+    lk.acquire()
+    logging.info("Thread received %s", id)
     
-    # view that will initialize the processing of video
-    # result= process_video.delay(video_id)
-    #result= do_work.delay()    #this should work and take the video_id as parameter
-    #context={'task_id': result.task_id}
-    context={}
-    return render(request, "video/yolo.html", context=context)
+    for i in range(0,10):
+        pass
 
+    task = ThreadTask.objects.get(pk=id)
+    task.is_done = True
+    task.save()
+    logging.info("Thread finish task %s", id)
 
+    lk.release()
+
+    return
+
+def startThreadTask(request, id):
+
+    lock = 1
+    t = threading.Thread(target=yolo_task, args=[lock, id])
+    t.setDaemon(True)
+    t.start()
+    
+    return JsonResponse({'id':id})
+
+i=0
+def checkThreadTask(request,task_id):
+    
+    global i
+    #task = ThreadTask.objects.get(pk=task_id)
+    #isdone= task.is_done
+    isdone= False;
+    i+= 1
+    if (i>=10):
+        isdone= True;
+
+    return JsonResponse({'task_done': isdone})
+
+### yolo part ###
 def video_yolo_view(request, video_id):
     obj = get_object_or_404(Video, id=video_id)
+
+    id=video_id
     inputfilename = obj.video
     path = settings.MEDIA_ROOT+'/result_json/'+obj.title+'.json'
-    if not os.path.isfile(path):
-        vidcap = cv2.VideoCapture(settings.MEDIA_ROOT+'/'+str(inputfilename))
-        success, image = vidcap.read()
-        i = 0
-        res={}
-        fourcc = cv2.VideoWriter_fourcc(*'mp4v')  # Be sure to use lower case
-        print(image.shape)
-        detector = YoloDetector((720., 960.))
-        print(type(image))
-        while success:
-            img = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-            print(type(img))
-            im_pil = Image.fromarray(img)
-            # out_scores, out_boxes, out_classes, image = detector.detect(im_pil)
-            # res[i] = {'out_scores': out_scores.tolist(), 'out_boxes': out_boxes.tolist(),
-            #           'out_classes': out_classes.tolist()}
-            i+=1
-        with open(settings.MEDIA_ROOT+'/result_json/'+obj.title+'.json', 'w') as fp:
-            json.dump(res, fp)
-    context = {
-        "path": path
-    }
+
+    startThreadTask(request, id)
+    context=  {'task_id': id}
     return render(request, "video/yolo.html", context)
 
