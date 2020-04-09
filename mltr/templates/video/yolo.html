@@ -15,19 +15,9 @@
 </div>
 <div id="progress-bar-message">Waiting for progress to start...</div>
 
-
-<div> Celery Result </div>
-<div id="celery-result"></div>
-
 <script>
-document.addEventListener("DOMContentLoaded", function () {
-var progressUrl = "{% url 'celery_progress:task_status' task_id %}";
-CeleryProgressBar.initProgressBar(progressUrl);
-});
 </script>
 
-<script src="{% static 'celery_progress/celery_progress.js' %}"></script>
+<script src="{% static 'js/yolo.js' %}"> </script>
 
-<!-- <script src="{% static 'js/yolo.js' %}"> </script>
- -->
 {%endblock%}

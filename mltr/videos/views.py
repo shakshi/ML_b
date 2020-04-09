@@ -8,9 +8,6 @@ from PIL import Image
 import json
 import os
 
-from celery.result import AsyncResult
-from celery import task, current_task, shared_task
-from celery_progress.backend import ProgressRecorder
 import time
 
 from django.http import HttpResponse, HttpResponseNotFound
@@ -63,18 +60,6 @@ def video_list_view(request):
     }
     return render(request, "video/show.html", context)
 
-@app.task(bind=True)
-def do_work(num=100):
-    """ Get some rest, asynchronously, and update the state all the time """
-    progress_recorder= ProgressRecorder()
-
-    i=0
-    while(i<2):
-        #sleep(0.1)
-        print("do work", i)
-        progress_recorder.set_progress(i, 100)
-        i+=1
-    return 'work complete'
 
 def poll_state(request):
     
@@ -84,21 +69,14 @@ def poll_state(request):
     else:
         return HttpResponse('No job id given.')
 
-    job = AsyncResult(job_id)
-    data = {'id': job.id, 'state': job.state, 'info': job.info}
-
+    #job = AsyncResult(job_id)
+    #data = {'id': job.id, 'state': job.state, 'info': job.info}
+    data= {}
     if data == None:
         return HttpResponse('Invalid job id')        
     return HttpResponse(json.dumps(data), content_type='application/json')
 
-def init_work(request):
-    """ A view to start a background job and redirect to the status page """
-    job = do_work.delay()
-    data = {'id': job.id, 'state': job.state, 'info': job.info}
-    return HttpResponse(json.dumps(data), content_type='application/json')
 
-
-@task
 def process_video(video_id):
 
     obj = get_object_or_404(Video, id=video_id)
@@ -143,9 +121,9 @@ def video_yolo_view(request, video_id):
     
     # view that will initialize the processing of video
     # result= process_video.delay(video_id)
-    result= do_work.delay()    #this should work and take the video_id as parameter
-    context={'task_id': result.task_id}
-
+    #result= do_work.delay()    #this should work and take the video_id as parameter
+    #context={'task_id': result.task_id}
+    context={}
     return render(request, "video/yolo.html", context=context)
 
 

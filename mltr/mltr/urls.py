@@ -19,11 +19,8 @@ from pages.views import home_view
 from django.conf import settings
 from django.conf.urls.static import static
 
-from django.urls import re_path
-
 urlpatterns = [
     path('', home_view, name='home'),
     path('admin/', admin.site.urls),
     path('videos/', include('videos.urls')),
-    re_path(r'^celery-progress/', include('celery_progress.urls')), 
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
