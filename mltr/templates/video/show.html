@@ -1,34 +1,92 @@
 {% extends 'base.html' %}
 {% load static %}
-<link rel="stylesheet" href="{% static 'css/show.css' %}">
+<link rel="stylesheet" href="{% static '/css/show.css' %}">
 
 {%block content%}
 
-	<h1>Videos</h1>
-    <table style="th,td: padding:2px">
+<div class="container">
+	<div class="row">
+	    <div class="col-md-12">
+	        <h2 class="text-center">
+	            Traffic violation scores
+	            <br>
+	        </h2>
+	    </div>
 
-    	<tr>
-			<td colspan="4" style="text-align: right; padding-bottom: 4px; border: 0px solid black">
-			<button> <a href="{%url 'create' %}" style="text-decoration: none"> + Upload </a></button>
-			</td>
-		</tr>
-		
-		<tr>
-			<th> Video Id </th>
-			<th> Title</th>
-			<th> Edit </th>
-			<th> Object Detection and Tracking (YOLO) </th>
-		</tr>
-	    {% for instance in object_list %}
-	    	<tr>
+	    <div class="col-md-12" style="text-align: right">
+	        <button> <a href="{%url 'create' %}" style="text-decoration: none"> + Upload </a></button>
+	        <br>
+	        <br>
+	    </div>
 
-	    	<td>{{ instance.id}}</td>
-	    	<td><a href="{{instance.get_absolute_url}}">{{ instance.title }}</a></td>
-	        <td><a href="{%url 'video_update' instance.id %}">Edit</a></td>
-	        <td><a href="{%url 'video_yolo' instance.id %}">Yolo</a></td>
-	        </p>
-	        </tr>
-	    {% endfor %}
-    </table>
+	    <div id="no-more-tables" class="col-sm-12">
+	        <table class="table-bordered table-striped table-hover table-condensed cf">
+	    		<thead class="cf">
+	    			<tr>
+						<th> Video </th>
+	    				<th>Red Light </th>
+	    				<th>Stop Sign</th>
+	    				<th>Speeding</th>
+	    				<th>Unsafe Lane Change</th>
+	    				
+	    			</tr>
+	    		</thead>
+	    		<tbody>
+	    			
+					{% for instance in object_list %}
+						<tr>
+						<td data-title="      "> <a href="{{instance.get_absolute_url}}">{{ instance.title }}</a>
+							<br> License Number- {{ instance.license_num }}
+						</td>
+
+						<td data-title="Red Light">
+							{% if instance.red_light_score == None %}
+					            Not Calculated
+					        {% elif instance.red_light_score >= 80 %}
+					            <span style="color: red"> {{ instance.red_light_score }} %  </span>
+					        { % else %}
+					        	{{ instance.red_light_score }} %
+					        {% endif %}
+				    	</td>
+
+				    	<td data-title="Stop Sign">
+							{% if instance.stop_sign_score == None %}
+					            Not Calculated
+					        {% elif instance.stop_sign_score >= 80 %}
+					            <span style="color: red"> {{ instance.stop_sign_score }} %  </span>
+					        { % else %}
+					        	{{ instance.stop_sign_score }} %
+					        {% endif %}
+				    	</td>
+
+				    	<td data-title="Speeding">
+							{% if instance.speeding_score == None %}
+					            Not Calculated
+					        {% elif instance.speeding_score >= 80 %}
+					            <span style="color: red"> {{ instance.speeding_score }} %  </span>
+					        { % else %}
+					        	{{ instance.speeding_score }} %
+					        {% endif %}
+				    	</td>
+
+				    	<td data-title="Unsafe Lane Change">
+							{% if instance.unsafe_lane_change_score == None %}
+					            Not Calculated
+					        {% elif instance.unsafe_lane_change_score >= 80 %}
+					            <span style="color: red"> {{ instance.unsafe_lane_change_score }} %  </span>
+					        { % else %}
+					        	{{ instance.unsafe_lane_change_score }} %
+					        {% endif %}
+				    	</td>
+	    			</tr>
+				
+					{% endfor %}
+				</tbody>
+			</table>
+		</div>
+	</div>
+</div>
+
+
 
 {%endblock%}

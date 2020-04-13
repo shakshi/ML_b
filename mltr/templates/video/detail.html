@@ -6,19 +6,27 @@
             No title
         {% endif %}
 </h1>
-<p>
-    {% if object.description != None and object.description != '' %}
-        {{object.description}}
-    {% else %}
-        No Description
-    {% endif %}
-</p>
-<div style="text-align: center">
-	<video style="width:80%; height: auto" controls>
-	<source src="{{ MEDIA_URL }}{{object.video}}" type='video/mp4'>
-	Your browser does not support the video tag.
-	</video>
+
+<div>
+    <div>
+        License Number - {{ object.license_num }}
+    </div>
+    <a href="{%url 'video_update' object.id %}" style="float: right">Edit</a> &nbsp;
 </div>
+
+<br>
+
+<div style="text-align: center">
+    <video style="width:70%; height: auto" controls>
+    <source src="{{ MEDIA_URL }}{{object.video}}" type='video/mp4'>
+    Your browser does not support the video tag.
+    </video>
+</div>
+
+<br>
+<a href="{%url 'video_yolo' object.id %}">Download Yolo file</a> &nbsp;&nbsp;
+<a href="{%url 'video_yolo' object.id %}">Download Tracking file</a>
+
 <br><br> 
 
 <button onclick="window.location.href = {%url 'video_list' %};">Back</button>

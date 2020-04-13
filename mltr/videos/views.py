@@ -82,10 +82,6 @@ def process_video(video_id):
             print(type(img))
             im_pil = Image.fromarray(img)
 
-
-            current_task.update_state(state='PROGRESS',
-            meta={'current': i, 'total': total_frames})
-
             # out_scores, out_boxes, out_classes, image = detector.detect(im_pil)
             # res[i] = {'out_scores': out_scores.tolist(), 'out_boxes': out_boxes.tolist(),
             #           'out_classes': out_classes.tolist()}
